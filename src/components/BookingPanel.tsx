@@ -73,7 +73,7 @@ export default function BookingPanel({ salon, date, reservations }: { salon: str
             </div>;
           })}
 
-          {validRange && <div className={`pointer-events-none absolute inset-x-1 z-20 overflow-hidden rounded-lg border-2 px-3 py-2 bg-white shadow-[0_2px_10px_rgba(0,0,0,.06)] ${clash ? "border-dashed border-[var(--muted)] text-[var(--muted)]" : "border-[var(--accent)] text-[var(--accent-dark)]"}`} style={{ top: selection.top, height: Math.max(selection.height, 20) }}>
+          {validRange && <div className={`pointer-events-none absolute inset-x-2 z-20 overflow-hidden rounded-md border-2 bg-[rgba(200,16,46,.06)] px-3 py-2 ${clash ? "border-dashed border-[var(--muted)] text-[var(--muted)]" : "border-[var(--accent)] text-[var(--accent-dark)]"}`} style={{ top: selection.top + 1, height: Math.max(selection.height - 2, 20) }}>
             <Block title={reason || "Motivo"} subtitle={name || "Nombre"} height={selection.height} />
           </div>}
         </div>
