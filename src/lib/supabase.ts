@@ -34,3 +34,9 @@ export async function getUpcomingReservations(): Promise<Reservation[]> {
   const { data } = await supabase.from("reservations").select("id,name,phone,reason,start_time,end_time,reservation_date,salon,kind").gte("reservation_date", today).order("reservation_date").order("start_time");
   return (data as ReservationRow[] | null)?.map(mapReservation) ?? [];
 }
+
+export async function getReservation(id: string): Promise<Reservation | null> {
+  if (!supabase || !/^[0-9a-f-]{36}$/i.test(id)) return null;
+  const { data } = await supabase.from("reservations").select("id,name,phone,reason,start_time,end_time,reservation_date,salon,kind").eq("id", id).maybeSingle();
+  return data ? mapReservation(data as ReservationRow) : null;
+}

@@ -27,24 +27,42 @@ function place(start: string, end: string) {
   return { top: ((from - calendarStart) / 60) * HOUR_HEIGHT, height: ((to - from) / 60) * HOUR_HEIGHT };
 }
 
-function Block({ title, subtitle, height }: { title: string; subtitle: string; height: number }) {
-  // En bloques cortos (media hora) todo va en una sola línea
+function shortTime(time: string) {
+  return time.replace(/^0/, "");
+}
+
+function Block({ title, subtitle, start, end, height }: { title: string; subtitle: string; start: string; end: string; height: number }) {
+  const range = `${shortTime(start)}–${shortTime(end)}`;
+  // Media hora: todo en una línea, con el horario primero para que nunca se corte
   if (height < 44) {
-    return <p className="truncate text-xs leading-none"><strong className="font-semibold">{title}</strong> · {subtitle}</p>;
+    return <p className="truncate text-xs leading-none"><span className="tabular-nums">{range}</span> · <strong className="font-semibold">{title}</strong> · {subtitle}</p>;
+  }
+  if (height < 80) {
+    return <>
+      <p className="truncate text-sm font-semibold leading-tight">{title}</p>
+      <p className="mt-0.5 truncate text-xs leading-tight">• {subtitle} · <span className="tabular-nums">{range}</span></p>
+    </>;
   }
   return <>
     <p className="truncate text-sm font-semibold leading-tight">{title}</p>
     <p className="mt-1 truncate text-xs leading-tight">• {subtitle}</p>
+    <p className="mt-1 text-xs leading-tight tabular-nums opacity-80">{range}</p>
   </>;
 }
 
 export default function BookingPanel({ salon, date, reservations }: { salon: string; date: string; reservations: Reservation[] }) {
-  const [start, setStart] = useState("09:00");
-  const [end, setEnd] = useState("10:00");
+  // La selección empieza en la primera hora libre (de preferencia desde las 9:00)
+  const [initialStart] = useState(() => {
+    const free = (from: number) => !reservations.some((r) => from < minutes(r.end) && from + 60 > minutes(r.start));
+    const candidates = [...hours.filter((h) => h >= 9), ...hours.filter((h) => h < 9)].map((h) => h * 60).filter((m) => m + 60 <= calendarEnd);
+    return candidates.find(free) ?? 9 * 60;
+  });
+  const [start, setStart] = useState(timeValue(initialStart));
+  const [end, setEnd] = useState(timeValue(initialStart + 60));
   const [name, setName] = useState("");
   const [reason, setReason] = useState("");
 
-  const validRange = minutes(end) > minutes(start);
+  const validRange = minutes(end) > minutes(start) && minutes(start) >= calendarStart && minutes(end) <= calendarEnd;
   const clash = validRange && reservations.some((reservation) => minutes(start) < minutes(reservation.end) && minutes(end) > minutes(reservation.start));
   const selection = place(start, end);
 
@@ -68,13 +86,13 @@ export default function BookingPanel({ salon, date, reservations }: { salon: str
 
           {reservations.map((reservation) => {
             const box = place(reservation.start, reservation.end);
-            return <div key={reservation.id} onClick={(event) => event.stopPropagation()} title={`${reservation.start}–${reservation.end}`} className="absolute inset-x-2 z-10 cursor-default overflow-hidden rounded-md bg-[#f2c4ca] px-3 py-2 text-[var(--accent-dark)]" style={{ top: box.top + 1, height: Math.max(box.height - 2, 20) }}>
-              <Block title={reservation.reason} subtitle={reservation.kind === "block" ? "Administración" : reservation.name} height={box.height} />
+            return <div key={reservation.id} onClick={(event) => event.stopPropagation()} className="absolute inset-x-2 z-10 cursor-default overflow-hidden rounded-md bg-[#f2c4ca] px-3 py-2 text-[var(--accent-dark)]" style={{ top: box.top + 1, height: Math.max(box.height - 2, 20) }}>
+              <Block title={reservation.reason} subtitle={reservation.kind === "block" ? "Administración" : reservation.name} start={reservation.start} end={reservation.end} height={box.height} />
             </div>;
           })}
 
-          {validRange && <div className={`pointer-events-none absolute inset-x-2 z-20 overflow-hidden rounded-md border-2 bg-[rgba(200,16,46,.06)] px-3 py-2 ${clash ? "border-dashed border-[var(--muted)] text-[var(--muted)]" : "border-[var(--accent)] text-[var(--accent-dark)]"}`} style={{ top: selection.top + 1, height: Math.max(selection.height - 2, 20) }}>
-            <Block title={reason || "Motivo"} subtitle={name || "Nombre"} height={selection.height} />
+          {validRange && <div className={`pointer-events-none absolute inset-x-2 z-20 overflow-hidden rounded-md border-2 bg-[rgba(200,16,46,.06)] px-3 py-2 ${clash ? "border-dashed border-[var(--accent)] bg-transparent" : "border-[var(--accent)] text-[var(--accent-dark)]"}`} style={{ top: selection.top + 1, height: Math.max(selection.height - 2, 20) }}>
+            {!clash && <Block title={reason || "Motivo"} subtitle={name || "Nombre"} start={start} end={end} height={selection.height} />}
           </div>}
         </div>
       </div>
@@ -94,7 +112,7 @@ export default function BookingPanel({ salon, date, reservations }: { salon: str
           <label>Fin<input required name="end" type="time" step={1800} className="field" value={end} onChange={(event) => setEnd(event.target.value)} /></label>
         </div>
         {clash && <p className="text-xs text-[var(--accent)]">Ese horario se empalma con otra reserva.</p>}
-        {!validRange && <p className="text-xs text-[var(--accent)]">La hora de fin debe ser después del inicio.</p>}
+        {!validRange && <p className="text-xs text-[var(--accent)]">Elige un horario entre {FIRST_HOUR}:00 y {LAST_HOUR}:00, con la hora de fin después del inicio.</p>}
         <button disabled={clash || !validRange} className="mt-2 rounded-full bg-[var(--accent)] px-5 py-3.5 text-sm font-semibold text-white hover:bg-[var(--accent-dark)] disabled:cursor-not-allowed disabled:opacity-40">Reservar</button>
       </div>
     </form>

@@ -12,9 +12,9 @@ function shiftDate(date: string, days: number) {
   return next.toISOString().slice(0, 10);
 }
 
-export default async function SalonPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ fecha?: string }> }) {
+export default async function SalonPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ fecha?: string; error?: string }> }) {
   const { slug } = await params;
-  const { fecha } = await searchParams;
+  const { fecha, error } = await searchParams;
   const salon = getSalon(slug);
   if (!salon) notFound();
   const date = fecha ?? new Date().toISOString().slice(0, 10);
@@ -52,6 +52,7 @@ export default async function SalonPage({ params, searchParams }: { params: Prom
           })}
         </div>
       </div>
+      {error && <p role="alert" className="mt-8 rounded-md border border-[var(--accent)] bg-[#fdf2f3] px-4 py-3 text-sm text-[var(--accent-dark)]">{error === "empalme" ? "Ese horario ya está ocupado. Elige otro que no se empalme con las reservas del calendario." : "No se pudo guardar la reserva. Revisa que todos los datos estén completos e inténtalo de nuevo."}</p>}
       <BookingPanel salon={slug} date={date} reservations={reservations} />
     </section>
   </main>;

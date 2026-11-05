@@ -8,8 +8,8 @@ export async function POST(request: Request) {
   const destination = new URL("/admin", request.url);
   if (!process.env.ADMIN_PASSWORD || password !== process.env.ADMIN_PASSWORD) {
     destination.searchParams.set("error", "1");
-    return NextResponse.redirect(destination);
+    return NextResponse.redirect(destination, 303);
   }
   (await cookies()).set(cookieName, createAdminToken(), { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge, path: "/" });
-  return NextResponse.redirect(destination);
+  return NextResponse.redirect(destination, 303);
 }

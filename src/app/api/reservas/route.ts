@@ -1,8 +1,18 @@
 import { NextResponse } from "next/server";
-import { getReservations, supabase, type Reservation } from "@/lib/supabase";
+import { getSalon } from "@/lib/data";
+import { getReservations, supabase } from "@/lib/supabase";
 
-function overlaps(start: string, end: string, reservation: Reservation) {
-  return start < reservation.end && end > reservation.start;
+const OPEN = 7 * 60;
+const CLOSE = 22 * 60;
+
+function toMinutes(time: string) {
+  const match = /^(\d{2}):(\d{2})/.exec(time);
+  return match ? Number(match[1]) * 60 + Number(match[2]) : NaN;
+}
+
+// 303 hace que el navegador cargue la siguiente página con GET (no reenvía el formulario)
+function go(url: URL) {
+  return NextResponse.redirect(url, 303);
 }
 
 export async function POST(request: Request) {
@@ -12,27 +22,36 @@ export async function POST(request: Request) {
   const name = String(form.get("name") ?? "").trim();
   const phone = String(form.get("phone") ?? "").trim();
   const reason = String(form.get("reason") ?? "").trim();
-  const start = String(form.get("start") ?? "");
-  const end = String(form.get("end") ?? "");
-  const destination = new URL(`/salon/${salon}?fecha=${date}`, request.url);
+  const startMinute = toMinutes(String(form.get("start") ?? ""));
+  const endMinute = toMinutes(String(form.get("end") ?? ""));
+  const back = new URL(`/salon/${encodeURIComponent(salon)}?fecha=${encodeURIComponent(date)}`, request.url);
 
-  if (!supabase || !salon || !date || !name || !phone || !reason || !start || !end || start >= end) {
-    destination.searchParams.set("error", "datos");
-    return NextResponse.redirect(destination);
+  const valid = getSalon(salon) && /^\d{4}-\d{2}-\d{2}$/.test(date) && name && phone && reason
+    && startMinute >= OPEN && endMinute <= CLOSE && startMinute < endMinute;
+  if (!supabase || !valid) {
+    back.searchParams.set("error", "datos");
+    return go(back);
   }
 
-  const reservations = await getReservations(salon, date);
-  if (reservations.some((reservation) => overlaps(start, end, reservation))) {
-    destination.searchParams.set("error", "empalme");
-    return NextResponse.redirect(destination);
+  const start = `${String(Math.floor(startMinute / 60)).padStart(2, "0")}:${String(startMinute % 60).padStart(2, "0")}`;
+  const end = `${String(Math.floor(endMinute / 60)).padStart(2, "0")}:${String(endMinute % 60).padStart(2, "0")}`;
+
+  // Revisión rápida; la base de datos también rechaza empalmes (restricción reservations_no_overlap)
+  const existing = await getReservations(salon, date);
+  if (existing.some((reservation) => startMinute < toMinutes(reservation.end) && endMinute > toMinutes(reservation.start))) {
+    back.searchParams.set("error", "empalme");
+    return go(back);
   }
 
-  const reservation: Reservation = { id: crypto.randomUUID(), salon, date, name, phone, reason, start, end, kind: "reservation" };
-  const { error } = await supabase.from("reservations").insert({ id: reservation.id, salon, reservation_date: date, name, phone, reason, start_time: start, end_time: end, start_minute: Number(start.slice(0, 2)) * 60 + Number(start.slice(3)), end_minute: Number(end.slice(0, 2)) * 60 + Number(end.slice(3)), kind: "reservation" });
+  const id = crypto.randomUUID();
+  const { error } = await supabase.from("reservations").insert({
+    id, salon, reservation_date: date, name, phone, reason,
+    start_time: start, end_time: end, start_minute: startMinute, end_minute: endMinute, kind: "reservation",
+  });
   if (error) {
-    destination.searchParams.set("error", error.code === "23P01" ? "empalme" : "datos");
-    return NextResponse.redirect(destination);
+    back.searchParams.set("error", error.code === "23P01" ? "empalme" : "datos");
+    return go(back);
   }
-    destination.searchParams.set("reservado", "1");
-    return NextResponse.redirect(destination);
+
+  return go(new URL(`/reserva/${id}`, request.url));
 }
