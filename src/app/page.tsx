@@ -8,7 +8,7 @@ export default function Home() {
     <main className="min-h-screen">
       <header className="mx-auto flex max-w-6xl items-center justify-between border-b border-[var(--line)] px-6 py-6 lg:px-10">
         <Link href="/" className="flex items-center gap-3">
-          <img src="/logo-cruz.svg" alt="Logo de la Parroquia Santo Tomás Moro" className="h-11 w-11 object-contain" />
+          <img src="/logo-santo-tomas-moro.svg" alt="Logo de la Parroquia Santo Tomás Moro" className="h-11 w-11 object-contain" />
           <span><strong className="block text-lg">Parroquia Santo Tomás Moro</strong><small className="sans text-xs uppercase tracking-[.18em] text-[var(--muted)]">Reservas</small></span>
         </Link>
       </header>
