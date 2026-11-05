@@ -31,7 +31,7 @@ export default async function ReservaPage({ params }: { params: Promise<{ id: st
 
   return <main className="min-h-screen">
     <header className="mx-auto flex max-w-6xl items-center justify-between border-b border-[var(--line)] px-6 py-6 lg:px-10">
-      <Link href="/" className="flex items-center gap-3"><img src="/logo-cruz.svg" alt="Logo de la parroquia Santo Tomás" className="h-11 w-11 object-contain" /><strong>Santo Tomás</strong></Link>
+      <Link href="/" className="flex items-center gap-3"><img src="/logo-cruz.svg" alt="Logo de la Parroquia Santo Tomás Moro" className="h-11 w-11 object-contain" /><strong>Parroquia Santo Tomás Moro</strong></Link>
     </header>
     <section className="mx-auto max-w-xl px-6 py-16">
       <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--accent)] text-white">

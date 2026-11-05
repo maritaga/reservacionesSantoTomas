@@ -9,8 +9,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Reservas Santo Tomás",
-  description: "Agenda los salones de la parroquia Santo Tomás.",
+  title: "Reservas | Parroquia Santo Tomás Moro",
+  description: "Agenda los salones de la Parroquia Santo Tomás Moro.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
