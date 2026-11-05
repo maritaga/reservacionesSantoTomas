@@ -6,6 +6,13 @@ import BookingPanel from "@/components/BookingPanel";
 
 export const dynamic = "force-dynamic";
 
+const errorMessages: Record<string, string> = {
+  empalme: "Ese horario ya está ocupado. Elige otro que no se empalme con las reservas del calendario.",
+  datos: "No se pudo guardar la reserva. Revisa que todos los datos estén completos e inténtalo de nuevo.",
+  config: "La página no está conectada a la base de datos (faltan SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY en Vercel). Avisa a la administración.",
+  guardar: "La base de datos rechazó la reserva. Avisa a la administración.",
+};
+
 function shiftDate(date: string, days: number) {
   const next = new Date(`${date}T12:00:00`);
   next.setDate(next.getDate() + days);
@@ -52,7 +59,7 @@ export default async function SalonPage({ params, searchParams }: { params: Prom
           })}
         </div>
       </div>
-      {error && <p role="alert" className="mt-8 rounded-md border border-[var(--accent)] bg-[#fdf2f3] px-4 py-3 text-sm text-[var(--accent-dark)]">{error === "empalme" ? "Ese horario ya está ocupado. Elige otro que no se empalme con las reservas del calendario." : "No se pudo guardar la reserva. Revisa que todos los datos estén completos e inténtalo de nuevo."}</p>}
+      {error && <p role="alert" className="mt-8 rounded-md border border-[var(--accent)] bg-[#fdf2f3] px-4 py-3 text-sm text-[var(--accent-dark)]">{errorMessages[error] ?? errorMessages.datos}</p>}
       <BookingPanel salon={slug} date={date} reservations={reservations} />
     </section>
   </main>;

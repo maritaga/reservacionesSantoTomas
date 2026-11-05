@@ -28,7 +28,12 @@ export async function POST(request: Request) {
 
   const valid = getSalon(salon) && /^\d{4}-\d{2}-\d{2}$/.test(date) && name && phone && reason
     && startMinute >= OPEN && endMinute <= CLOSE && startMinute < endMinute;
-  if (!supabase || !valid) {
+  if (!supabase) {
+    console.error("Reservas: faltan las variables SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY en Vercel");
+    back.searchParams.set("error", "config");
+    return go(back);
+  }
+  if (!valid) {
     back.searchParams.set("error", "datos");
     return go(back);
   }
@@ -49,7 +54,8 @@ export async function POST(request: Request) {
     start_time: start, end_time: end, start_minute: startMinute, end_minute: endMinute, kind: "reservation",
   });
   if (error) {
-    back.searchParams.set("error", error.code === "23P01" ? "empalme" : "datos");
+    console.error("Reservas: Supabase rechazó la reserva", error);
+    back.searchParams.set("error", error.code === "23P01" ? "empalme" : "guardar");
     return go(back);
   }
 

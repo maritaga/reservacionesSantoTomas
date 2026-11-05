@@ -24,7 +24,8 @@ function mapReservation(row: ReservationRow): Reservation {
 
 export async function getReservations(salon: string, date: string): Promise<Reservation[]> {
   if (!supabase) return [];
-  const { data } = await supabase.from("reservations").select("id,name,phone,reason,start_time,end_time,reservation_date,salon,kind").eq("salon", salon).eq("reservation_date", date).order("start_time");
+  const { data, error } = await supabase.from("reservations").select("id,name,phone,reason,start_time,end_time,reservation_date,salon,kind").eq("salon", salon).eq("reservation_date", date).order("start_time");
+  if (error) console.error("Reservas: no se pudieron leer de Supabase", error);
   return (data as ReservationRow[] | null)?.map(mapReservation) ?? [];
 }
 
