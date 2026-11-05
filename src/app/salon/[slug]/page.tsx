@@ -21,7 +21,7 @@ export default async function SalonPage({ params, searchParams }: { params: Prom
   const currentDay = new Date(`${date}T12:00:00`);
   const weekStart = shiftDate(date, -currentDay.getDay());
   const weekDays = Array.from({ length: 7 }, (_, index) => shiftDate(weekStart, index));
-  const weekEnd = weekDays[6];
+  const monthTitle = currentDay.toLocaleDateString("es-MX", { month: "long", year: "numeric" }).replace(" de ", " ");
   const reservations = await getReservations(slug, date);
   const previous = shiftDate(date, -7);
   const next = shiftDate(date, 7);
@@ -35,7 +35,23 @@ export default async function SalonPage({ params, searchParams }: { params: Prom
       <p className="sans mt-14 text-xs font-bold uppercase tracking-[.2em] text-[var(--accent)]">Reservaciones</p>
       <h1 className="mt-3 text-5xl">{salon.name}</h1>
       <p className="sans mt-3 text-sm text-[var(--muted)]">{salon.detail}</p>
-      <div className="mt-12"><div className="flex items-center justify-between border-y border-[var(--line)] py-4"><Link aria-label="Semana anterior" className="text-2xl text-[var(--accent)]" href={`/salon/${slug}?fecha=${previous}`}>‹</Link><span className="sans text-sm font-bold">{weekStart} – {weekEnd}</span><Link aria-label="Semana siguiente" className="text-2xl text-[var(--accent)]" href={`/salon/${slug}?fecha=${next}`}>›</Link></div><div className="calendar-days mt-5 grid grid-cols-7 border border-[var(--line)]">{weekDays.map((day) => <Link key={day} href={`/salon/${slug}?fecha=${day}`} className={`relative border-l border-[var(--line)] px-1 py-3 text-center first:border-l-0 ${day === date ? "font-bold text-[var(--accent)]" : "text-[var(--muted)]"}`}><span className="sans block text-[10px] uppercase">{new Date(`${day}T12:00:00`).toLocaleDateString("es-MX", { weekday: "short" })}</span><span className="sans mt-1 block text-sm">{new Date(`${day}T12:00:00`).getDate()}</span>{day === date && <span className="absolute bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-[var(--accent)]" />}</Link>)}</div></div>
+      <div className="mt-12">
+        <div className="flex items-center justify-between">
+          <Link aria-label="Semana anterior" className="px-2 text-2xl text-[var(--accent)]" href={`/salon/${slug}?fecha=${previous}`}>‹</Link>
+          <h2 className="text-xl font-semibold capitalize">{monthTitle}</h2>
+          <Link aria-label="Semana siguiente" className="px-2 text-2xl text-[var(--accent)]" href={`/salon/${slug}?fecha=${next}`}>›</Link>
+        </div>
+        <div className="mt-6 grid grid-cols-7 gap-1">
+          {weekDays.map((day) => {
+            const selected = day === date;
+            const label = new Date(`${day}T12:00:00`);
+            return <Link key={day} href={`/salon/${slug}?fecha=${day}`} aria-current={selected ? "date" : undefined} className="flex flex-col items-center gap-2">
+              <span className="text-[10px] uppercase tracking-wider text-[var(--muted)]">{label.toLocaleDateString("es-MX", { weekday: "short" }).replace(".", "")}</span>
+              <span className={`flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-semibold transition sm:h-12 sm:w-12 sm:text-base ${selected ? "border-[var(--accent)] bg-[var(--accent)] text-white" : "border-[var(--foreground)] hover:border-[var(--accent)] hover:text-[var(--accent)]"}`}>{label.getDate()}</span>
+            </Link>;
+          })}
+        </div>
+      </div>
       <BookingPanel salon={slug} date={date} reservations={reservations} />
     </section>
   </main>;
