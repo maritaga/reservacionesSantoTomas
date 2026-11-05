@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #191919;
+  --muted: #6f6f6f;
+  --line: #dedede;
+  --accent: #c8102e;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-poppins), sans-serif;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+a { color: inherit; text-decoration: none; }
+
+button, input, select, textarea { font: inherit; }
+
+.sans { font-family: var(--font-poppins), sans-serif; }
+
+.field {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+  border: 1px solid var(--line);
+  padding: 0.8rem 0.85rem;
+  outline: none;
+}
+
+.field:focus { border-color: var(--accent); }
+
+.calendar-hour, .calendar-slot { height: 50px; }
+.calendar-hour { padding-top: 0.35rem; }
+.calendar-column { height: 800px; }
