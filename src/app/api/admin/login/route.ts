@@ -4,9 +4,15 @@ import { cookieName, createAdminToken, maxAge } from "@/lib/admin";
 
 export async function POST(request: Request) {
   const form = await request.formData();
-  const password = String(form.get("password") ?? "");
+  // Se ignoran espacios o saltos de línea al inicio y al final (comunes al copiar y pegar)
+  const password = String(form.get("password") ?? "").trim();
+  const expected = (process.env.ADMIN_PASSWORD ?? "").trim();
   const destination = new URL("/admin", request.url);
-  if (!process.env.ADMIN_PASSWORD || password !== process.env.ADMIN_PASSWORD) {
+  if (!expected) {
+    destination.searchParams.set("error", "config");
+    return NextResponse.redirect(destination, 303);
+  }
+  if (password !== expected) {
     destination.searchParams.set("error", "1");
     return NextResponse.redirect(destination, 303);
   }

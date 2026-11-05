@@ -5,7 +5,7 @@ const cookieName = "santo-tomas-admin";
 const maxAge = 60 * 60 * 24 * 7;
 
 function signature(value: string) {
-  return crypto.createHmac("sha256", process.env.ADMIN_PASSWORD ?? "").update(value).digest("hex");
+  return crypto.createHmac("sha256", (process.env.ADMIN_PASSWORD ?? "").trim()).update(value).digest("hex");
 }
 
 export function createAdminToken() {
@@ -14,7 +14,7 @@ export function createAdminToken() {
 }
 
 export async function isAdmin() {
-  const password = process.env.ADMIN_PASSWORD;
+  const password = (process.env.ADMIN_PASSWORD ?? "").trim();
   if (!password) return false;
   const token = (await cookies()).get(cookieName)?.value;
   if (!token) return false;
