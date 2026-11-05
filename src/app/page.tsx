@@ -17,8 +17,8 @@ export default function Home() {
         <h1 className="max-w-3xl text-4xl leading-[1.08] tracking-tight sm:text-6xl lg:text-7xl">Reserva un espacio para tu comunidad.</h1>
         <p className="sans mt-6 max-w-xl text-base leading-7 text-[var(--muted)]">Consulta la disponibilidad y solicita un salón para reuniones, grupos y actividades de la parroquia.</p>
         <div className="mt-12 grid gap-4 md:mt-16 md:grid-cols-3 md:gap-5">
-          {salons.map((salon, index) => <Link key={salon.slug} href={`/salon/${salon.slug}`} className={`${tones[index]} group min-h-64 border border-transparent p-7 transition hover:border-[var(--accent)]`}>
-            <div className="flex h-full flex-col justify-between"><span className="sans text-xs uppercase tracking-[.16em] text-[var(--muted)]">Salón</span><div><h2 className="text-3xl">{salon.name}</h2><p className="sans mt-2 text-sm text-[var(--muted)]">{salon.detail}</p><span className="sans mt-7 inline-block text-sm font-bold text-[var(--accent)]">Ver disponibilidad <span className="transition group-hover:ml-2">→</span></span></div></div>
+          {salons.map((salon, index) => <Link key={salon.slug} href={`/salon/${salon.slug}`} className={`${tones[index]} group min-h-48 border border-transparent p-5 transition hover:border-[var(--accent)]`}>
+            <div className="flex h-full flex-col justify-between"><span className="sans text-xs uppercase tracking-[.16em] text-[var(--muted)]">Salón</span><div><h2 className="text-2xl leading-tight">{salon.name}</h2><p className="sans mt-2 text-sm text-[var(--muted)]">{salon.detail}</p><span className="sans mt-5 inline-block text-sm font-bold text-[var(--accent)]">Ver disponibilidad <span className="transition group-hover:ml-2">→</span></span></div></div>
           </Link>)}
         </div>
       </section>
